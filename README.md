@@ -24,25 +24,23 @@ do
 done
 ```
 
-`geopackage` files can be processed into the `mbtiles` tiled format using [`tippecanoe`](https://github.com/mapbox/tippecanoe):
+`geopackage` files can be processed into the `pmtiles` tiled format using [`tippecanoe`](https://github.com/mapbox/tippecanoe):
 ```sh
-ogr2ogr -f GeoJSONSeq /vsistdout/ 2024_T3_couv_Metropole_BOUY_4G_data.gpkg | tippecanoe -z15 -P -l BOUY -o BOUY.pmtiles
-ogr2ogr -f GeoJSONSeq /vsistdout/ 2024_T3_couv_Metropole_FREE_4G_data.gpkg | tippecanoe -z15 -P -l BOUY -o FREE.pmtiles
-ogr2ogr -f GeoJSONSeq /vsistdout/ 2024_T3_couv_Metropole_OF_4G_data.gpkg | tippecanoe -z15 -P -l BOUY -o OF.pmtiles
-ogr2ogr -f GeoJSONSeq /vsistdout/ 2024_T3_couv_Metropole_SFR0_4G_data.gpkg | tippecanoe -z15 -P -l BOUY -o SFR0.pmtiles
-
-# Geoms are too numerous to be represented at higher zoom levels for Metropolitan France: --drop-densest-as-needed
-# Zoom levels 8-10: drop attributes and coalesce geometries: -X --coalesce
+ogr2ogr -f GeoJSONSeq /vsistdout/ 2024_T3_couv_Metropole_BOUY_4G_data.gpkg | tippecanoe -z14 -P -S 2 -pS -ac -ah -ao -l BOUY -o BOUY.pmtiles
+ogr2ogr -f GeoJSONSeq /vsistdout/ 2024_T3_couv_Metropole_FREE_4G_data.gpkg | tippecanoe -z14 -P -S 2 -pS -ac -ah -ao -l FREE -o FREE.pmtiles
+ogr2ogr -f GeoJSONSeq /vsistdout/ 2024_T3_couv_Metropole_OF_4G_data.gpkg   | tippecanoe -z14 -P -S 2 -pS -ac -ah -ao -l OF   -o   OF.pmtiles
+ogr2ogr -f GeoJSONSeq /vsistdout/ 2024_T3_couv_Metropole_SFR0_4G_data.gpkg | tippecanoe -z14 -P -S 2 -pS -ac -ah -ao -l SFR0 -o SFR0.pmtiles
 ```
 
-Several `mbtiles` files can be joined in a single file in which datasets are represented as "layers":
+Several `pmtiles` files can be joined in a single file in which datasets are represented as "layers":
 ```sh
-tile-join -pk -o ALL.mbtiles BOUY.pmtiles FREE.pmtiles OF.pmtiles SFR0.pmtiles
+tile-join -pk -o 2024_T3_couv_Metropole_4G_data.pmtiles BOUY.pmtiles FREE.pmtiles OF.pmtiles SFR0.pmtiles
 rm BOUY.pmtiles FREE.pmtiles OF.pmtiles SFR0.pmtiles
 ```
 NOTE: While packing layers together is convenient for visualisation, it may not be the best option, for instance to embed the tiled data in a website.
 
-The generated `mbtiles` can then be converted to the `pmtiles` format (`tippecanoe` tends to generate broken `pmtiles` files):
+
 ```sh
-pmtiles convert ALL.mbtiles ALL.pmtiles
+mc cp 2024_T3_couv_Metropole_4G_data.pmtiles s3/gferey/diffusion/pmtiles/2024_T3_couv_Metropole_4G_data.pmtiles
+mc anonymous set download s3/gferey/diffusion/pmtiles/2024_T3_couv_Metropole_4G_data.pmtiles
 ```
